@@ -25,7 +25,7 @@ public class LocalMediaFragment extends BaseFragment {
 
     @Override
     protected int bindContentView() {
-        return R.layout.fragment_sorted_media;//这个布局可以复用
+        return R.layout.fragment_local_media;//这个布局可以复用
     }
 
     @Override

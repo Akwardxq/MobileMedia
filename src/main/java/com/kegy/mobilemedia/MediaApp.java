@@ -18,7 +18,7 @@ public class MediaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Tourist.getInstance(this).login();
+//        Tourist.getInstance(this).login();
     }
 
     public static void setLoginInfo(LoginInfo loginInfo) {

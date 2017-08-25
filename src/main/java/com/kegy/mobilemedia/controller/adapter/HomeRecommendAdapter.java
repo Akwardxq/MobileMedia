@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.model.account.RankListResponse;
+import com.kegy.mobilemedia.model.media.NetVideo;
 import com.kegy.mobilemedia.utils.Logger;
 
 import java.util.List;
@@ -23,26 +24,24 @@ import java.util.List;
 
 public class HomeRecommendAdapter extends BaseAdapter {
 
-
-    private List<RankListResponse.RankListItem> mRankListItems;
+    private NetVideo mNetVideo;
     private LayoutInflater mLayoutInflater;
     private Context mContext;
 
-    public HomeRecommendAdapter(List<RankListResponse.RankListItem> items, Context context) {
-        Logger.d("NetVideoAdapter constructor items size: " + items.size());
-        this.mRankListItems = items;
+    public HomeRecommendAdapter(NetVideo netVideo, Context context) {
+        this.mNetVideo = netVideo;
         this.mContext = context.getApplicationContext();
         this.mLayoutInflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public int getCount() {
-        return mRankListItems.size();
+        return mNetVideo.trailers.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mRankListItems.get(position);
+        return mNetVideo.trailers.get(position);
     }
 
     @Override
@@ -68,11 +67,11 @@ public class HomeRecommendAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        RankListResponse.RankListItem item = (RankListResponse.RankListItem) getItem(position);
-        viewHolder.name.setText(item.name);
-        viewHolder.desc.setText(TextUtils.isEmpty(item.desc)?"暂无":item.desc);
+        NetVideo.VideoItem videoItem = (NetVideo.VideoItem) getItem(position);
+        viewHolder.name.setText(videoItem.movieName);
+        viewHolder.desc.setText(TextUtils.isEmpty(videoItem.videoTitle)?"暂无":videoItem.videoTitle);
         Glide.with(mContext)
-                .load(item.poster_list.getPostUrl())
+                .load(videoItem.coverImg)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(viewHolder.header);
         return convertView;

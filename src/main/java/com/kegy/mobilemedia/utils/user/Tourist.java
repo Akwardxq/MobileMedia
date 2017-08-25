@@ -23,12 +23,6 @@ import com.kegy.mobilemedia.utils.manager.MobileDataManager;
 public class Tourist {
 
     private static Tourist sInstance;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-        }
-    };
 
     private Context mContext;
 

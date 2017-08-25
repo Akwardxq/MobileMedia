@@ -4,18 +4,25 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.kegy.mobilemedia.MediaApp;
 import com.kegy.mobilemedia.R;
+import com.kegy.mobilemedia.controller.adapter.SortedMediaAdapter;
 import com.kegy.mobilemedia.controller.base.BaseFragment;
 import com.kegy.mobilemedia.model.account.TypeList.TypeChildren;
+import com.kegy.mobilemedia.model.media.NetAudio;
 import com.kegy.mobilemedia.model.widget.UnderLinePageIndicator;
 import com.kegy.mobilemedia.utils.Config;
 import com.kegy.mobilemedia.utils.Logger;
+import com.kegy.mobilemedia.utils.http.HttpUtils;
+import com.kegy.mobilemedia.utils.manager.MobileDataManager;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -24,12 +31,11 @@ import java.util.List;
  */
 public class SortedMediaFragment extends BaseFragment {
 
-    private List<Integer> mTypeIds = new ArrayList<>();
-    private List<String> mTypeNames = new ArrayList<>();
-    private TypeChildren mTypeChildren;
-    private UnderLinePageIndicator mIndicator;
-    private ViewPager mViewPager;
+    private ListView mListView;
     private TextView mTextView;
+    private NetAudio mNetAudio;
+    private SortedMediaAdapter mAdapter;
+    private SwipeRefreshLayout mRefreshLayout;
 
     @Override
     protected int bindContentView() {
@@ -39,51 +45,52 @@ public class SortedMediaFragment extends BaseFragment {
     @Override
     protected void initView() {
         mTextView = (TextView) findViewById(R.id.tv_fragment_sort_media_notype);
-        mIndicator = (UnderLinePageIndicator)findViewById(R.id.upi_sorted_media);
-        mViewPager = (ViewPager) findViewById(R.id.vp_sorted_media);
+        mListView = (ListView) findViewById(R.id.lv_fragment_sort_media);
+        mRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.sr_fragment_sort_media);
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getData();
+                mRefreshLayout.setRefreshing(true);
+            }
+        });
     }
 
     @Override
     protected void getData() {
-        mTypeChildren = MediaApp.sTypeChildren;
-        if (mTypeChildren != null && mTypeChildren.getChildren() != null) {
-            for (TypeChildren children : mTypeChildren.getChildren()) {
-                if(children.getLabelPosition() == Config.LABEL_VOD
-                        || children.getLabelPosition() == Config.LABEL_SERIES
-                        || children.getLabelPosition() == Config.LABEL_MUSIC) {
-                    mTypeNames.add(children.getName());
-                    mTypeIds.add(children.getId());
-                    Logger.d("id=" + children.getId() + ",name=" + children.getName());
+        HttpUtils.callJSONAPI(Config.ALL_SRC, new HttpUtils.StringResponseListener() {
+            @Override
+            public void onSuccess(String result) {
+                if (result != null) {
+                    mNetAudio = MobileDataManager.getGson().fromJson(result,NetAudio.class);
+                    final List<NetAudio.ListEntity> entities = mNetAudio.getList();
+                    Iterator<NetAudio.ListEntity> iterator = entities.iterator();
+                    while (iterator.hasNext()) {
+                        NetAudio.ListEntity entity = iterator.next();
+                        if ("video".equals(entity.getType())) {
+                            iterator.remove();
+                        }
+                    }
+                    Logger.d("Net Audio size: " + entities.size());
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRefreshLayout.setRefreshing(false);
+                            if (mAdapter == null) {
+                                mListView.setAdapter(mAdapter = new SortedMediaAdapter(getActivity(), entities));
+                            } else {
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
+
                 }
             }
-            if (mTypeIds.size() > 0) {
-                mViewPager.setOffscreenPageLimit(mTypeIds.size());
-                mViewPager.setAdapter(new TypePagerAdapter(getChildFragmentManager()));
-                mIndicator.setViewPager(mViewPager);
+
+            @Override
+            public void onError(String error) {
+
             }
-        } else {
-            mTextView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private class TypePagerAdapter extends FragmentStatePagerAdapter {
-        public TypePagerAdapter(FragmentManager childFragmentManager) {
-            super(childFragmentManager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return SortedMediaPageFragment.newInstance(mTypeIds.get(position));
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mTypeNames.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mTypeIds.size();
-        }
+        });
     }
 }

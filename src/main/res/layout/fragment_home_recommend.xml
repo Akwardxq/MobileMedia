@@ -15,16 +15,10 @@
         android:textSize="14sp"
         android:visibility="gone"/>
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/sp_refresh_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
         <ListView
             android:id="@+id/lv_home_recommend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
         </ListView>
-    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

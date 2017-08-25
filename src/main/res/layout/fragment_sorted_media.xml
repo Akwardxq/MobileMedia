@@ -9,26 +9,24 @@
         android:id="@+id/tv_fragment_sort_media_notype"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="暂无数据"
-        android:gravity="center"
         android:layout_gravity="center"
-        android:textColor="@android:color/white"
         android:background="@drawable/tv_fragment_sort_media_page_background"
-        android:visibility="gone"
-        android:textSize="18sp"/>
+        android:gravity="center"
+        android:text="暂无数据"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:visibility="gone"/>
 
-    <com.kegy.mobilemedia.model.widget.UnderLinePageIndicator
-        android:id="@+id/upi_sorted_media"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/sr_fragment_sort_media"
         android:layout_width="match_parent"
-        android:layout_height="33dp"
-        android:layout_marginTop="8dp">
-    </com.kegy.mobilemedia.model.widget.UnderLinePageIndicator>
+        android:layout_height="match_parent">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vp_sorted_media"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="5dp">
-    </android.support.v4.view.ViewPager>
+        <ListView
+            android:id="@+id/lv_fragment_sort_media"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </ListView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>
