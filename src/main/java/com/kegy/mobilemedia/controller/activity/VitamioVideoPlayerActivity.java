@@ -17,13 +17,10 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -31,9 +28,6 @@ import android.widget.TextView;
 
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.controller.base.BaseVideoPlayerActivity;
-import com.kegy.mobilemedia.controller.window.ChooseSeriesWindow;
-import com.kegy.mobilemedia.model.account.SeriesInfoList;
-import com.kegy.mobilemedia.model.account.VideoDetail;
 import com.kegy.mobilemedia.model.media.MediaItem;
 import com.kegy.mobilemedia.model.media.SerializableList;
 import com.kegy.mobilemedia.utils.Config;
@@ -43,7 +37,6 @@ import com.kegy.mobilemedia.utils.common.Icon;
 import com.kegy.mobilemedia.utils.common.NetUtils;
 import com.kegy.mobilemedia.utils.common.TimeUtils;
 import com.kegy.mobilemedia.utils.http.HttpUtils;
-import com.kegy.mobilemedia.utils.manager.APIManager;
 import com.kegy.mobilemedia.utils.manager.MobileDataManager;
 
 import java.io.Serializable;
@@ -51,8 +44,6 @@ import java.util.List;
 
 import io.vov.vitamio.Vitamio;
 import io.vov.vitamio.widget.VideoView;
-
-import static com.kegy.mobilemedia.utils.manager.APIManager.getVideoInfo;
 
 
 /**
@@ -94,7 +85,7 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
     private TextView mMediaName, mCurrentTime, mCurrentDuration, mTotalDuration;
     private ImageView mBatteryInfo;
     private Button mVolumeBtn, mSwitchBtn, mBackBtn, mPreBtn, mFullScnBtn;
-    private TextView mNext,mPlay;
+    private TextView mNext, mPlay;
     private SeekBar mVolumeSkb, mMediaSkb;
 
     private AudioManager mAudioManager;
@@ -106,8 +97,6 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
     private int mCurrentPlayIndex;
 
     private List<MediaItem> mMediaItems;
-
-    private List<SeriesInfoList.SeriesInfoListItem> mNetMediaItems;
 
     private GestureDetector mGestureDetector;
 
@@ -237,22 +226,6 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
         return intent;
     }
 
-    /**
-     * 传递的是多个播放文件，但是是网络的视频资源，不传递playindex，默认被赋值为0
-     *
-     * @param context
-     * @param serializable
-     * @return
-     */
-    public static Intent newIntent(Context context, Serializable serializable) {
-        Intent intent = new Intent(context, VitamioVideoPlayerActivity.class);
-        intent.putExtra(EXTRA_RES_TYPE, NET_MEDIA);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(EXTRA_MEDIAS, serializable);
-        intent.putExtras(bundle);
-        return intent;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -335,16 +308,6 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
                     mResourceType = ResourceType.TYPE_LIST;
                 }
             }
-            if (mResourceType == ResourceType.TYPE_NETWORK) {
-                SerializableList<SeriesInfoList.SeriesInfoListItem> list =
-                        (SerializableList<SeriesInfoList.SeriesInfoListItem>)
-                                bundle.getSerializable(EXTRA_MEDIAS);
-                if (list != null) {
-                    mNetMediaItems = list.getList();
-                    mCurrentPlayIndex = 0;
-                    mResourceType = ResourceType.TYPE_NETWORK;
-                }
-            }
         }
         setData();
     }
@@ -369,44 +332,9 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
                 mNetUri = NetUtils.isNetResource(mUri.toString());
                 mVideoPlayer.setVideoURI(mUri);
                 break;
-            case TYPE_NETWORK:
-                Logger.d("type network");
-                SeriesInfoList.SeriesInfoListItem item = mNetMediaItems.get(mCurrentPlayIndex);
-                if (item != null) {
-                    getMovieSeriesPlayInfo(item.getVideo_id());
-                }
-                break;
             default:
                 break;
         }
-    }
-
-    /**
-     * 获取某个视频的具体信息
-     */
-    private void getMovieSeriesPlayInfo(final String netResVideoId) {
-        Logger.d("getMovieSeriesPlayInfo videoid: " + netResVideoId);
-        if (TextUtils.isEmpty(netResVideoId)) {
-            Toaster.toast(this, "加载视频信息失败");
-            return;
-        }
-        APIManager.getVideoInfo(netResVideoId, new HttpUtils.StringResponseListener() {
-            @Override
-            public void onSuccess(String result) {
-                if (result != null) {
-                    Logger.d("getMovieSeriesPlayInfo success");
-                    VideoDetail video = MobileDataManager.getGson().fromJson(result, VideoDetail.class);
-                    playMovieSeriesItem(video
-                            .getDemand_url().get(0), video
-                            .getPlay_token(), netResVideoId);
-                }
-            }
-
-            @Override
-            public void onError(String error) {
-
-            }
-        });
     }
 
     private String mPlayUrl;
@@ -669,16 +597,6 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
                 mNetUri = NetUtils.isNetResource(mMediaItems.get(mCurrentPlayIndex).getPath());
                 mVideoPlayer.setVideoPath(mMediaItems.get(mCurrentPlayIndex).getPath());
                 break;
-            case TYPE_NETWORK:
-                if (temp < 0) {
-                    temp = mNetMediaItems.size() - 1;
-                }
-                if (temp > mNetMediaItems.size() - 1) {
-                    temp = 0;
-                }
-                mCurrentPlayIndex = temp;
-                getMovieSeriesPlayInfo(mNetMediaItems.get(mCurrentPlayIndex).getVideo_id());
-                break;
             default:
                 break;
         }
@@ -723,59 +641,10 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
                     showSwitchDialog();
                     break;
                 case R.id.tv_select_video:
-                    showChooseSeriesWindow();
                     break;
             }
             mHandler.removeMessages(TOGGLE_CONTROLLER_MESSAGE);
             mHandler.sendEmptyMessageDelayed(TOGGLE_CONTROLLER_MESSAGE, HIDE_CONTROLLER_TIME);
-        }
-    }
-
-    private ChooseSeriesWindow mChooseSeriesWindow;
-    public void showChooseSeriesWindow() {
-        if (mResourceType == ResourceType.TYPE_NETWORK) {
-            mChooseSeriesWindow = new ChooseSeriesWindow(this, mNetMediaItems);
-            mChooseSeriesWindow.show(mVideoPlayer, mNetMediaItems.get(mCurrentPlayIndex).getSeries_idx());
-            toggleControllerVisibility();
-        }
-    }
-
-    private class AllVideoAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return mNetMediaItems.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mNetMediaItems.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.select_video_item, parent, false);
-                viewHolder = new ViewHolder();
-                viewHolder.title = (TextView) convertView.findViewById(R.id.tv_video_item_title);
-                convertView.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
-            SeriesInfoList.SeriesInfoListItem item = (SeriesInfoList.SeriesInfoListItem) getItem(position);
-            viewHolder.title.setText(item.getSeries_idx());
-            return convertView;
-        }
-
-        class ViewHolder {
-            public TextView title;
         }
     }
 
@@ -828,8 +697,11 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
             mHandler.sendEmptyMessageDelayed(REFRESH_MESSAGE, 1000);
             if (mUri != null) {
                 mMediaName.setText(mUri.toString());
-            } else if (mMediaItems.get(mCurrentPlayIndex) != null) {
-                mMediaName.setText(mMediaItems.get(mCurrentPlayIndex).getDisplayName());
+            } else if (mMediaItems != null) {
+                if (mMediaItems.get(mCurrentPlayIndex) != null)
+                    mMediaName.setText(mMediaItems.get(mCurrentPlayIndex).getDisplayName());
+            } else if (!TextUtils.isEmpty(mPath)) {
+                mMediaName.setText(mPath);
             }
         }
     }
@@ -873,7 +745,7 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
             intent = SystemVideoPlayerActivity.newIntent(this, list, mCurrentPlayIndex);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         } else if (mUri != null) {
-            intent = SystemVideoPlayerActivity.newIntent(this,mUri.toString());
+            intent = SystemVideoPlayerActivity.newIntent(this, mUri.toString());
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             intent.setData(mUri);
         } else if (mPlayUrl != null) {
@@ -896,8 +768,6 @@ public class VitamioVideoPlayerActivity extends BaseVideoPlayerActivity {
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
         Logger.d("SystemVideoPlayerActivity onTouchEvent");
-        if (mChooseSeriesWindow != null)
-            mChooseSeriesWindow.hide();
         mGestureDetector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:

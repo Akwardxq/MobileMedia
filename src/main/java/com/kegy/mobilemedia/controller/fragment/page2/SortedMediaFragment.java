@@ -13,7 +13,6 @@ import com.kegy.mobilemedia.MediaApp;
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.controller.adapter.SortedMediaAdapter;
 import com.kegy.mobilemedia.controller.base.BaseFragment;
-import com.kegy.mobilemedia.model.account.TypeList.TypeChildren;
 import com.kegy.mobilemedia.model.media.NetAudio;
 import com.kegy.mobilemedia.model.widget.UnderLinePageIndicator;
 import com.kegy.mobilemedia.utils.Config;

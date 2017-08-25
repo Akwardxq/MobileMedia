@@ -4,31 +4,20 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.kegy.mobilemedia.MediaApp;
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.controller.activity.SystemVideoPlayerActivity;
 import com.kegy.mobilemedia.controller.adapter.HomeRecommendAdapter;
 import com.kegy.mobilemedia.controller.base.BaseFragment;
-import com.kegy.mobilemedia.model.account.RankListResponse;
-import com.kegy.mobilemedia.model.account.SeriesInfoList;
 import com.kegy.mobilemedia.model.media.NetVideo;
-import com.kegy.mobilemedia.model.media.SerializableList;
 import com.kegy.mobilemedia.utils.Config;
 import com.kegy.mobilemedia.utils.Logger;
-import com.kegy.mobilemedia.utils.Toaster;
 import com.kegy.mobilemedia.utils.http.HttpUtils;
-import com.kegy.mobilemedia.utils.manager.APIManager;
 import com.kegy.mobilemedia.utils.manager.MobileDataManager;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 首页推荐Fragment<br>

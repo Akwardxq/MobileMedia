@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.kegy.mobilemedia.R;
-import com.kegy.mobilemedia.model.account.RankListResponse;
 import com.kegy.mobilemedia.model.media.NetVideo;
 import com.kegy.mobilemedia.utils.Logger;
 

@@ -46,6 +46,7 @@
         <activity
             android:name=".controller.activity.SystemVideoPlayerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="321影音(牛!)"
             android:theme="@style/noAnimation_Theme">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>

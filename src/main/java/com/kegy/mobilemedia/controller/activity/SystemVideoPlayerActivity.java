@@ -30,9 +30,6 @@ import android.widget.TextView;
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.controller.base.BaseVideoPlayerActivity;
 import com.kegy.mobilemedia.controller.view.VideoView;
-import com.kegy.mobilemedia.controller.window.ChooseSeriesWindow;
-import com.kegy.mobilemedia.model.account.SeriesInfoList;
-import com.kegy.mobilemedia.model.account.VideoDetail;
 import com.kegy.mobilemedia.model.media.MediaItem;
 import com.kegy.mobilemedia.model.media.SerializableList;
 import com.kegy.mobilemedia.utils.Config;
@@ -42,7 +39,6 @@ import com.kegy.mobilemedia.utils.common.Icon;
 import com.kegy.mobilemedia.utils.common.NetUtils;
 import com.kegy.mobilemedia.utils.common.TimeUtils;
 import com.kegy.mobilemedia.utils.http.HttpUtils;
-import com.kegy.mobilemedia.utils.manager.APIManager;
 import com.kegy.mobilemedia.utils.manager.MobileDataManager;
 
 import java.io.Serializable;
@@ -81,7 +77,7 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
     private ResourceType mResourceType = ResourceType.TYPE_SINGLE;
 
     private enum ResourceType {
-        TYPE_SINGLE, TYPE_LIST, TYPE_NETWORK, TYPE_OTHERS
+        TYPE_SINGLE, TYPE_LIST, TYPE_OTHERS
     }
 
     private VideoView mVideoPlayer;
@@ -100,8 +96,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
     private int mCurrentPlayIndex;
 
     private List<MediaItem> mMediaItems;
-
-    private List<SeriesInfoList.SeriesInfoListItem> mNetMediaItems;
 
     private GestureDetector mGestureDetector;
 
@@ -234,22 +228,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
         return intent;
     }
 
-    /**
-     * 传递的是多个播放文件，但是是网络的视频资源，不传递playindex，默认被赋值为0
-     *
-     * @param context
-     * @param serializable
-     * @return
-     */
-    public static Intent newIntent(Context context, Serializable serializable) {
-        Intent intent = new Intent(context, SystemVideoPlayerActivity.class);
-        intent.putExtra(EXTRA_RES_TYPE, NET_MEDIA);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(EXTRA_MEDIAS, serializable);
-        intent.putExtras(bundle);
-        return intent;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -313,13 +291,10 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
         if (mPath != null)
             mResourceType = ResourceType.TYPE_SINGLE;
 
-        if (NET_MEDIA.equals(getIntent().getStringExtra(EXTRA_RES_TYPE))) {
-            mResourceType = ResourceType.TYPE_NETWORK;
-        }
-
         if (LOCAL_MEDIA_LIST.equals(getIntent().getStringExtra(EXTRA_RES_TYPE))) {
             mResourceType = ResourceType.TYPE_LIST;
         }
+
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             if (mResourceType == ResourceType.TYPE_LIST) {
@@ -329,16 +304,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
                     mMediaItems = list.getList();
                     mCurrentPlayIndex = bundle.getInt(EXTRA_PLAY_INDEX);
                     mResourceType = ResourceType.TYPE_LIST;
-                }
-            }
-            if (mResourceType == ResourceType.TYPE_NETWORK) {
-                SerializableList<SeriesInfoList.SeriesInfoListItem> list =
-                        (SerializableList<SeriesInfoList.SeriesInfoListItem>)
-                                bundle.getSerializable(EXTRA_MEDIAS);
-                if (list != null) {
-                    mNetMediaItems = list.getList();
-                    mCurrentPlayIndex = 0;
-                    mResourceType = ResourceType.TYPE_NETWORK;
                 }
             }
         }
@@ -365,44 +330,9 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
                 mNetUri = NetUtils.isNetResource(mUri.toString());
                 mVideoPlayer.setVideoURI(mUri);
                 break;
-            case TYPE_NETWORK:
-                Logger.d("type network");
-                SeriesInfoList.SeriesInfoListItem item = mNetMediaItems.get(mCurrentPlayIndex);
-                if (item != null) {
-                    getMovieSeriesPlayInfo(item.getVideo_id());
-                }
-                break;
             default:
                 break;
         }
-    }
-
-    /**
-     * 获取某个视频的具体信息
-     */
-    private void getMovieSeriesPlayInfo(final String netResVideoId) {
-        Logger.d("getMovieSeriesPlayInfo videoid: " + netResVideoId);
-        if (TextUtils.isEmpty(netResVideoId)) {
-            Toaster.toast(this, "加载视频信息失败");
-            return;
-        }
-        APIManager.getVideoInfo(netResVideoId, new HttpUtils.StringResponseListener() {
-            @Override
-            public void onSuccess(String result) {
-                if (result != null) {
-                    Logger.d("getMovieSeriesPlayInfo success");
-                    VideoDetail video = MobileDataManager.getGson().fromJson(result, VideoDetail.class);
-                    playMovieSeriesItem(video
-                            .getDemand_url().get(0), video
-                            .getPlay_token(), netResVideoId);
-                }
-            }
-
-            @Override
-            public void onError(String error) {
-
-            }
-        });
     }
 
     private String mPlayUrl;
@@ -666,16 +596,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
                 mNetUri = NetUtils.isNetResource(mMediaItems.get(mCurrentPlayIndex).getPath());
                 mVideoPlayer.setVideoPath(mMediaItems.get(mCurrentPlayIndex).getPath());
                 break;
-            case TYPE_NETWORK:
-                if (temp < 0) {
-                    temp = mNetMediaItems.size() - 1;
-                }
-                if (temp > mNetMediaItems.size() - 1) {
-                    temp = 0;
-                }
-                mCurrentPlayIndex = temp;
-                getMovieSeriesPlayInfo(mNetMediaItems.get(mCurrentPlayIndex).getVideo_id());
-                break;
             default:
                 break;
         }
@@ -719,22 +639,12 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
                     showSwitchDialog();
                     break;
                 case R.id.tv_select_video:
-                    showChooseSeriesWindow();
+//                    showChooseSeriesWindow();
 //                    showAllVideos();
                     break;
             }
             mHandler.removeMessages(TOGGLE_CONTROLLER_MESSAGE);
             mHandler.sendEmptyMessageDelayed(TOGGLE_CONTROLLER_MESSAGE, HIDE_CONTROLLER_TIME);
-        }
-    }
-
-    private ChooseSeriesWindow mChooseSeriesWindow;
-
-    public void showChooseSeriesWindow() {
-        if (mResourceType == ResourceType.TYPE_NETWORK) {
-            mChooseSeriesWindow = new ChooseSeriesWindow(this, mNetMediaItems);
-            mChooseSeriesWindow.show(mVideoPlayer, mNetMediaItems.get(mCurrentPlayIndex).getSeries_idx());
-            toggleControllerVisibility();
         }
     }
 
@@ -825,11 +735,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
             intent = VitamioVideoPlayerActivity.newIntent(this);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             intent.setData(mUri);
-        } else if (mNetMediaItems != null) {
-            SerializableList<SeriesInfoList.SeriesInfoListItem> itemSerializableList = new SerializableList<>();
-            itemSerializableList.setList(mNetMediaItems);
-            intent = VitamioVideoPlayerActivity.newIntent(this, itemSerializableList);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         } else {
             intent = VitamioVideoPlayerActivity.newIntent(this,mPath);
         }
@@ -848,8 +753,6 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
         Logger.d("SystemVideoPlayerActivity onTouchEvent");
-        if (mChooseSeriesWindow != null)
-            mChooseSeriesWindow.hide();
         mGestureDetector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:

@@ -20,11 +20,6 @@ public class HttpUtils {
 
     private static ExecutorService sPool = Executors.newCachedThreadPool();
 
-    public static void callJSONAPI(final String url, final RequestParams params, StringResponseListener listener) {
-        String key = AsyncHttpClient.getUrlWithQueryString(url, params);
-        callJSONAPI(key, listener);
-    }
-
     public static void callJSONAPI(final String url, final StringResponseListener listener) {
         Logger.d("call JSON API url: " + url);
         sPool.submit(new Callable<String>() {

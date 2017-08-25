@@ -7,7 +7,6 @@ import android.support.v4.view.ViewPager;
 
 import com.kegy.mobilemedia.R;
 import com.kegy.mobilemedia.controller.base.BaseFragment;
-import com.kegy.mobilemedia.controller.fragment.page2.SortedMediaPageFragment;
 import com.kegy.mobilemedia.model.widget.UnderLinePageIndicator;
 
 import java.util.ArrayList;
