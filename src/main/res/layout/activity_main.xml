@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/header_layout"></include>
+
+    <FrameLayout
+        android:id="@+id/fl_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+    </FrameLayout>
+
+    <RadioGroup
+        android:id="@+id/activity_main_rg"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#11000000"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/activity_main_home_recommend"
+            style="@style/rb_activity_main_style"
+            android:drawableTop="@drawable/rb_local_video_drawable_selector"
+            android:text="首页推荐"/>
+
+        <RadioButton
+            android:id="@+id/activity_main_sort_medias"
+            style="@style/rb_activity_main_style"
+            android:drawableTop="@drawable/rb_local_audio_drawable_selector"
+            android:text="分类视频"/>
+
+        <RadioButton
+            android:id="@+id/activity_main_local_medias"
+            style="@style/rb_activity_main_style"
+            android:drawableTop="@drawable/rb_net_video_drawable_selector"
+            android:text="本地文件"/>
+
+        <RadioButton
+            android:id="@+id/activity_main_person_center"
+            style="@style/rb_activity_main_style"
+            android:drawableTop="@drawable/rb_net_audio_drawable_selector"
+            android:text="个人中心"/>
+
+    </RadioGroup>
+
+</LinearLayout>

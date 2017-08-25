@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="选集看"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="24sp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <GridView
+            android:id="@+id/lv_all_videos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:columnWidth="60dp"
+            android:horizontalSpacing="1.0px"
+            android:listSelector="@null"
+            android:numColumns="5"
+            android:padding="8dp"
+            android:smoothScrollbar="true"
+            android:soundEffectsEnabled="true"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="1.0px">
+        </GridView>
+    </ScrollView>
+
+</LinearLayout>

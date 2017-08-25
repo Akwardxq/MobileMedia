@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_fragment_sort_media_notype"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="暂无数据"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textColor="@android:color/white"
+        android:background="@drawable/tv_fragment_sort_media_page_background"
+        android:visibility="gone"
+        android:textSize="18sp"/>
+
+    <com.kegy.mobilemedia.model.widget.UnderLinePageIndicator
+        android:id="@+id/upi_sorted_media"
+        android:layout_width="match_parent"
+        android:layout_height="33dp"
+        android:layout_marginTop="8dp">
+    </com.kegy.mobilemedia.model.widget.UnderLinePageIndicator>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_sorted_media"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="5dp">
+    </android.support.v4.view.ViewPager>
+
+</LinearLayout>
