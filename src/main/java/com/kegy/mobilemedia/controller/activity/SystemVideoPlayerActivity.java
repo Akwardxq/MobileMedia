@@ -830,7 +830,8 @@ public class SystemVideoPlayerActivity extends BaseVideoPlayerActivity {
             itemSerializableList.setList(mNetMediaItems);
             intent = VitamioVideoPlayerActivity.newIntent(this, itemSerializableList);
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
+        } else {
+            intent = VitamioVideoPlayerActivity.newIntent(this,mPath);
         }
         startActivity(intent);
         finish();

@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.activity_main_local_medias:
                         switchFragment(mCurrentId, 2);
                         break;
-                    case R.id.activity_main_person_center:
-                        switchFragment(mCurrentId, 3);
-                        break;
                 }
             }
         });
@@ -66,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
         mFragments.add(new HomeRecommendFragment());
         mFragments.add(new SortedMediaFragment());
         mFragments.add(new LocalMediaFragment());
-        mFragments.add(new PersonCenterFragment());
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.add(R.id.fl_fragment_container, mFragments.get(0))
@@ -75,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
                 .hide(mFragments.get(1));
         ft.add(R.id.fl_fragment_container, mFragments.get(2))
                 .hide(mFragments.get(2));
-        ft.add(R.id.fl_fragment_container, mFragments.get(3))
-                .hide(mFragments.get(3));
 
         ft.commitAllowingStateLoss();
         initUI();

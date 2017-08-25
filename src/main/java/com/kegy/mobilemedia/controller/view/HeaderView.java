@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.kegy.mobilemedia.R;
+import com.kegy.mobilemedia.controller.activity.SearchActivity;
 import com.kegy.mobilemedia.utils.Toaster;
 
 /**
@@ -48,7 +49,7 @@ public class HeaderView extends LinearLayout implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_search:
-                Toaster.toast(mContext,"搜索");
+                getContext().startActivity(SearchActivity.newIntent(getContext()));
                 break;
             case R.id.tv_game:
                 Toaster.toast(mContext,"游戏");
